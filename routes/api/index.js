@@ -1,8 +1,8 @@
 // Dependencies
 const router = require("express").Router();
 const userRoutes = require("./users");
-const teamRoutes = require("./teams");
-const tripRoutes = require("./trips");
+// const teamRoutes = require("./teams");
+// const tripRoutes = require("./trips");
 
 // Routes
 router.use("/users", userRoutes);
