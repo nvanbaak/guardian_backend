@@ -11,8 +11,7 @@ router.route("/users")
             .catch(err => res.status(422).json(err));
     }) // end of get()
     .post((req, res) => {
-        db.User.find(req.query)
-            .sort({ _id: 1 })
+        db.User.create(req.body)
             .then(result => res.json(result))
             .catch(err => res.status(422).json(err));
     }); // end of post()
