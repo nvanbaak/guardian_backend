@@ -3,7 +3,7 @@ const router = require("express").Router();
 const db = require("../../models");
 
 // Request without an id
-router.route("/users")
+router.route("/trips")
     .get((req, res) => {
         db.User.find(req.query)
             .sort({ _id: 1 })
@@ -17,7 +17,7 @@ router.route("/users")
     }); // end of post()
 
 // Request with an id
-router.route("./users/:id")
+router.route("./trips/:id")
     .get((req, res) => {
         db.User.findById(req.params.id)
             .then(result => res.json(result))
