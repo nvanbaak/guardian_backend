@@ -34,3 +34,5 @@ router.route("./trips/:id")
             .then(result => res.json(result))
             .catch(err => res.status(422).json(err));
     }) // end of delete()
+
+module.exports = router;
