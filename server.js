@@ -4,7 +4,7 @@ const app = express();
 const PORT = process.env.PORT || 9164;
 
 // Auth
-const dotenv = require('dotenv').config();
+require('dotenv').config();
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));

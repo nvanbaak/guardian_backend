@@ -1,6 +1,7 @@
 // Dependencies
 const router = require("express").Router();
 const db = require("../../models");
+const bcrypt = require("bcrypt");
 
 // Request without an id
 router.route("/users")
@@ -11,9 +12,18 @@ router.route("/users")
             .catch(err => res.status(422).json(err));
     }) // end of get()
     .post((req, res) => {
-        db.User.create(req.body)
-            .then(result => res.json(result))
-            .catch(err => res.status(422).json(err));
+        // assign req.body to new variable
+        let newUser = req.body;
+        // hash password
+        bcrypt.hash(req.body.password, 10, (err, hash) => {
+            if (err) throw err;
+            // Store in new user variable
+            newUser.password = hash;
+            // create new user using new variable
+            db.User.create(newUser)
+                .then(result => res.json(result))
+                .catch(err => res.status(422).json(err));
+        });
     }); // end of post()
 
 // Request with an id
