@@ -17,14 +17,14 @@ router.route("/trips")
     }); // end of post()
 
 // Request with an id
-router.route("./trips/:id")
+router.route("/trips/:id")
     .get((req, res) => {
         db.User.findById(req.params.id)
             .then(result => res.json(result))
             .catch(err => res.status(422).json(err));
     }) // end of get()
     .put((req, res) => {
-        db.User.findOneandUpdate( {_id: req.params.id}, req.body)
+        db.User.findOneAndUpdate( {_id: req.params.id}, req.body)
             .then( result => res.json(result) )
             .catch(err => res.status(422).json(err));
     }) // end of put()
