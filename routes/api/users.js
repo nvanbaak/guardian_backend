@@ -2,6 +2,9 @@
 const router = require("express").Router();
 const db = require("../../models");
 const bcrypt = require("bcrypt");
+const config = require("../../config/auth.config.js");
+const authjwt = require("../../middleware");
+const jwt = require("jsonwebtoken");
 
 // Request without an id
 router.route("/users")
@@ -25,6 +28,42 @@ router.route("/users")
                 .catch(err => res.status(422).json(err));
         });
     }); // end of post()
+
+// Sign up
+router.route("/users/signin").post((req, res) => {
+
+    // Find user by email
+    db.User.findOne({
+        email: req.body.email
+    })
+        .exec((err, user) => {
+            if (err) {
+                res.status(500).send({ message: err });
+                return;
+            }
+            if (!user) {
+                return res.status(404).send({ message: "User not found!" });
+            }
+            var passwordIsValid = bcrypt.compareSync(
+                req.body.password,
+                user.password
+            );
+            if (!passwordIsValid) {
+                return res.status(401).send({
+                    accessToken: null,
+                    message: "Invalid password!"
+                });
+            }
+            var token = jwt.sign({ id: user.id }, config.secret, {
+                expiresIn: 86400 //24 hours
+            });
+            res.status(200).json({
+                id: user._id,
+                email: user.email,
+                accessToken: token
+            });
+        });
+});
 
 // Request with an id
 router.route("/users/:id")
