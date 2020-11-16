@@ -35,13 +35,13 @@ router.route("/users/:id")
     }) // end of get()
     .put((req, res) => {
         db.User.findOneAndUpdate( {_id: req.params.id}, req.body)
-            .then( result => res.json(result) )
+            .then( result => res.json(result._id) )
             .catch(err => res.status(422).json(err));
     }) // end of put()
     .delete((req, res) => {
         db.User.findById(req.params.id)
             .then(result => result.remove())
-            .then(result => res.json(result))
+            .then(result => res.json(result._id))
             .catch(err => res.status(422).json(err));
     }) // end of delete()
 

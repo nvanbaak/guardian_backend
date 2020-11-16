@@ -8,7 +8,7 @@ const teamSchema = new Schema({
         required: "Team name is required"
     },
     members: {
-        array: ["member1", "member2", "member3"]
+        type: "array"
     },
     team_color: {
         type: "string"
