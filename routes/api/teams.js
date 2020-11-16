@@ -15,3 +15,24 @@ router.route("/teams")
         .then(result => res.json(result))
         .catch(err => res.status(422).json(err));
     }) // end of post()
+
+    // Request with an id
+    router.route("./teams/:id")
+        .get((req, res) => {
+            db.User.findById(req.params.id)
+            .then(result => res.json(result))
+            .catch(err => res.status(422).json(err));
+        })
+        .put((req, res) => {
+            db.User.findOneandUpdate( {_id: req.params.id}, req.body)
+                .then(result => res.json(result))
+                .catch(err => res.status(422).json(err));
+        })
+        .delete((req, res) => {
+            db.User.findById(req.params.id)
+                .then(result => result.remove())
+                .then(result => res.json(result))
+                .catch(err => res.status(422).json(err))
+        })
+
+        module.exports = router
