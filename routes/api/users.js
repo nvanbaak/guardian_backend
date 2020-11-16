@@ -6,6 +6,9 @@ const bcrypt = require("bcrypt");
 // Request without an id
 router.route("/users")
     .get((req, res) => {
+
+        console.log(db);
+
         db.User.find(req.query)
             .sort({ _id: 1 })
             .then(results => res.json(results))
