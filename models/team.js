@@ -3,14 +3,14 @@ const Schema = mongoose.Schema;
 
 // Schema 
 const teamSchema = new Schema({
-    teamName: {
+    team_name: {
         type: "string",
         required: "Team name is required"
     },
-    teamMembers: {
+    members: {
         array: ["member1", "member2", "member3"]
     },
-    teamColor: {
+    team_color: {
         type: "string"
     }
 })

@@ -7,7 +7,7 @@ const tripSchema = new Schema({
         type: "string",
         required: "Please enter a city",
     },
-    safety: {
+    safety_rating: {
         type: "number"
     },
     report_doc: {
