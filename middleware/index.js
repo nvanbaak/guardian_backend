@@ -1,5 +1,3 @@
-const authJwt = require("./authJwt");
+const authjwt = require("./authjwt");
 
-module.exports = {
-    authJwt
-}
+module.exports = authjwt;

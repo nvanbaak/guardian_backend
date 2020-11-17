@@ -7,9 +7,6 @@ const tripSchema = new Schema({
         type: "string",
         required: "Please enter a city",
     },
-    safety: {
-        type: "number"
-    },
     report_doc: {
         type: "string",
         required: "Your report needs content!"
@@ -37,4 +34,4 @@ const tripSchema = new Schema({
 // Model
 const Trip = mongoose.model("Trip", tripSchema);
 
-// module.exports = Trip;
+module.exports = Trip;

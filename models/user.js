@@ -9,12 +9,12 @@ const userSchema = new Schema({
         match: [/.+@.+\..+/, "Please enter a valid e-mail address"],
         required: "Email is required!",
     },
-    firstName: {
+    first_name: {
         type: "string",
         trim: true,
         required: "You need a first name!"
     },
-    lastName: {
+    last_name: {
         type: "string",
         trim: true,
         required: "You need a last name!"
