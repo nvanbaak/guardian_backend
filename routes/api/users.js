@@ -10,6 +10,7 @@ const jwt = require("jsonwebtoken");
 router.route("/users")
     .get((req, res) => {
         db.User.find({})
+            .populate('trips')
             .sort({ _id: 1 })
             .then(results => res.json(results))
             .catch(err => res.status(422).json(err));
@@ -69,6 +70,7 @@ router.route("/users/signin").post((req, res) => {
 router.route("/users/:id")
     .get((req, res) => {
         db.User.findById(req.params.id)
+            .populate('trips')
             .then(result => res.json(result))
             .catch(err => res.status(422).json(err));
     }) // end of get()
