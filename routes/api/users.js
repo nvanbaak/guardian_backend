@@ -9,7 +9,7 @@ const jwt = require("jsonwebtoken");
 // Request without an id
 router.route("/users")
     .get((req, res) => {
-        db.User.find({})
+        db.User.find(req.query)
             .populate('trips')
             .sort({ _id: 1 })
             .then(results => res.json(results))
