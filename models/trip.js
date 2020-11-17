@@ -28,7 +28,11 @@ const tripSchema = new Schema({
     itinerary: {
         type: "Array",
         required: "Your itinerary needs at least one stop!"
-    }
+    },
+    users:[{
+        type: Schema.Types.ObjectId,
+        ref: "User"
+    }]
 });
 
 // Model
