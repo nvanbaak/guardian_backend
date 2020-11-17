@@ -9,7 +9,7 @@ const jwt = require("jsonwebtoken");
 // Request without an id
 router.route("/users")
     .get((req, res) => {
-        db.User.find(req.query)
+        db.User.find({})
             .sort({ _id: 1 })
             .then(results => res.json(results))
             .catch(err => res.status(422).json(err));
@@ -29,7 +29,7 @@ router.route("/users")
         });
     }); // end of post()
 
-// Sign up
+// Sign in
 router.route("/users/signin").post((req, res) => {
 
     // Find user by email
