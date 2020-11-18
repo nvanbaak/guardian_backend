@@ -68,7 +68,13 @@ router.get("/userInfo", (req, res) => {
     db.User.findOne({
         email: loggedInUser.email
     })
-    .populate("trips")
+    .populate({
+        path: "trips",
+        populate: {
+            path: "users",
+            component: "User"
+        }
+    })
     .then(dbUser => {
         res.json(dbUser)
     })
