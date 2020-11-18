@@ -26,7 +26,11 @@ const userSchema = new Schema({
     },
     position: {
         type: "string"
-    }
+    },
+    trips:[{
+        type: Schema.Types.ObjectId,
+        ref: "Trip"
+    }]
 });
 
 // Model
