@@ -1,7 +1,11 @@
 // Express boilerplate
 const express = require('express');
+const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 9164;
+
+// cors
+app.use(cors());
 
 // Auth
 require('dotenv').config();
