@@ -1,40 +1,67 @@
 // Dependencies
 const router = require("express").Router();
 const db = require("../../models");
+const jwt = require("jsonwebtoken");
+const checkAuthStatus = require("../../utils/checkAuthStatus");
+const mongojs = require("mongojs");
 
 // Request without an id
 router.route("/trips")
     .get((req, res) => {
-        db.Trip.find(req.query)
-            .populate('users')
-            .sort({ _id: 1 })
-            .then(results => res.json(results))
-            .catch(err => res.status(422).json(err));
+        db.Trip.find().then(trips => {
+            res.json(trips);
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).send("THERE WAS AN ERROR FINDING THE TRIPS")
+        })
     }) // end of get()
     .post((req, res) => {
-        db.Trip.create(req.body)
-            .then(result => res.json(result))
-            .catch(err => res.status(422).json(err));
+        const loggedInUser = checkAuthStatus(req);
+        if (!loggedInUser) {
+            return res.status(401).send("MUST LOGIN FIRST!")
+        }
+
+        db.Trip.create({
+            city: req.body.city,
+            start_date: req.body.start_date,
+            end_date: req.body.end_date,
+            users: [loggedInUser.id]
+        })
+        .then(trip => {
+            db.User.findOneAndUpdate({ _id: mongojs.ObjectId(trip.users[0])},{ $push: { trips: trip._id}}, (err, data) => {
+                if (err) {
+                    console.log("error");
+                    res.send(err)
+                } else {
+                    res.send(data)
+                }
+            })
+            // console.log(trip.users[0])
+        }).catch(err => {
+            console.log(err);
+            res.status(500).send("SOMETHING WENT WRONG CREATING YOUR TRIP")
+        })
     }); // end of post()
 
 // Request with an id
-router.route("/trips/:id")
-    .get((req, res) => {
-        db.Trip.findById(req.params.id)
-            .populate('users')
-            .then(result => res.json(result))
-            .catch(err => res.status(422).json(err));
-    }) // end of get()
-    .put((req, res) => {
-        db.Trip.findOneAndUpdate( {_id: req.params.id}, req.body)
-            .then( result => res.json(result._id) )
-            .catch(err => res.status(422).json(err));
-    }) // end of put()
-    .delete((req, res) => {
-        db.Trip.findById(req.params.id)
-            .then(result => result.remove())
-            .then(result => res.json(result._id))
-            .catch(err => res.status(422).json(err));
-    }) // end of delete()
+// router.route("/trips/:id")
+//     .get((req, res) => {
+//         db.Trip.findById(req.params.id)
+//             .populate('users')
+//             .then(result => res.json(result))
+//             .catch(err => res.status(422).json(err));
+//     }) // end of get()
+//     .put((req, res) => {
+//         db.Trip.findOneAndUpdate( {_id: req.params.id}, req.body)
+//             .then( result => res.json(result._id) )
+//             .catch(err => res.status(422).json(err));
+//     }) // end of put()
+//     .delete((req, res) => {
+//         db.Trip.findById(req.params.id)
+//             .then(result => result.remove())
+//             .then(result => res.json(result._id))
+//             .catch(err => res.status(422).json(err));
+//     }) // end of delete()
 
 module.exports = router;

@@ -2,18 +2,18 @@
 const router = require("express").Router();
 const db = require("../../models");
 const bcrypt = require("bcrypt");
-const config = require("../../config/auth.config.js");
-const authjwt = require("../../middleware");
 const jwt = require("jsonwebtoken");
+const checkAuthStatus = require("../../utils/checkAuthStatus");
 
 // Request without an id
 router.route("/users")
     .get((req, res) => {
-        db.User.find(req.query)
-            .populate('trips')
-            .sort({ _id: 1 })
-            .then(results => res.json(results))
-            .catch(err => res.status(422).json(err));
+        db.User.find().then(dbUsers => {
+            res.json(dbUsers)
+        }).catch(err => {
+            console.log(err);
+            res.status(500).end();
+        })
     }) // end of get()
     .post((req, res) => {
         // assign req.body to new variable
@@ -37,94 +37,64 @@ router.route("/users/signin").post((req, res) => {
     db.User.findOne({
         email: req.body.email
     })
-        .exec((err, user) => {
-            if (err) {
-                res.status(500).send({ message: err });
-                return;
+    .then(foundUser => {
+        if (!foundUser) {
+            return res.status(404).send("USER NOT FOUND!");
+        }
+        if (bcrypt.compareSync(req.body.password, foundUser.password)) {
+            const userTokenInfo = {
+                email: foundUser.email,
+                id: foundUser._id,
+                first_name: foundUser.first_name,
+                last_name: foundUser.last_name
             }
-            if (!user) {
-                return res.status(404).send({ message: "User not found!" });
-            }
-            var passwordIsValid = bcrypt.compareSync(
-                req.body.password,
-                user.password
-            );
-            if (!passwordIsValid) {
-                return res.status(401).send({
-                    accessToken: null,
-                    message: "Invalid password!"
-                });
-            }
-            var token = jwt.sign({ id: user.id }, config.secret, {
-                expiresIn: 86400 //24 hours
-            });
-            res.status(200).json({
-                id: user._id,
-                email: user.email,
-                accessToken: token
-            });
-        });
+            const token = jwt.sign(userTokenInfo, process.env.JWT_SECRET, {expiresIn:"2h"});
+            return res.status(200).json({token: token})
+        }
+        else {
+            res.status(403).send("WRONG PASSWORD!")
+        }
+    })
 });
 
+router.get("/userInfo", (req, res) => {
+    const loggedInUser = checkAuthStatus(req);
+    console.log(loggedInUser);
+
+    if (!loggedInUser) {
+        return res.status(401).send("INVALID TOKEN")
+    }
+    db.User.findOne({
+        email: loggedInUser.email
+    })
+    .populate("trips")
+    .then(dbUser => {
+        res.json(dbUser)
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).send("AN ERROR OCCURRED PLEASE TRY AGAIN LATER");
+    })
+})
+
 // Request with an id
-router.route("/users/:id")
-    .get((req, res) => {
-        db.User.findById(req.params.id)
-            .populate('trips')
-            .then(result => res.json(result))
-            .catch(err => res.status(422).json(err));
-    }) // end of get()
-    .put((req, res) => {
-        db.User.findOneAndUpdate( {_id: req.params.id}, req.body)
-            .then( result => res.json(result._id) )
-            .catch(err => res.status(422).json(err));
-    }) // end of put()
-    .delete((req, res) => {
-        db.User.findById(req.params.id)
-            .then(result => result.remove())
-            .then(result => res.json(result._id))
-            .catch(err => res.status(422).json(err));
-    }) // end of delete()
-
-
-// Signin post request
-router.route("/users/signin")
-    .post((req,res) => {
-        db.User.findOne({
-            email: req.body.email
-        })
-            .exec((err, user) => {
-                if (err) {
-                    res.status(500).send({ message: err });
-                    return;
-                }
-
-                if (!user) {
-                    return res.status(404).send({ message: "User not found!" });
-                }
-
-                var passwordIsValid = bcrypt.compareSync(
-                    req.body.password,
-                    user.password
-                );
-
-                if (!passwordIsValid) {
-                    return res.status(401).send({
-                        accessToken: null,
-                        message: "Invalid password!"
-                    });
-                }
-
-                var token = jwt.sign({ id: user.id }, config.secret, {
-                    expiresIn: 86400 //24 hours
-                });
-
-                res.status(200).json({
-                    id: user._id,
-                    email: user.email,
-                    accessToken: token
-                });
-            });
-    });
+// router.route("/users/:id")
+//     .get((req, res) => {
+//         db.User.findById(req.params.id)
+//             .populate('trips')
+//             .then(result => res.json(result))
+//             .catch(err => res.status(422).json(err));
+//     }) // end of get()
+//     .put((req, res) => {
+//         db.User.findOneAndUpdate( {_id: req.params.id}, req.body)
+//             .then( result => res.json(result._id) )
+//             .catch(err => res.status(422).json(err));
+//     }) // end of put()
+//     .delete((req, res) => {
+//         db.User.findById(req.params.id)
+//             .then(result => result.remove())
+//             .then(result => res.json(result._id))
+//             .catch(err => res.status(422).json(err));
+//     }) // end of delete()
 
 module.exports = router;

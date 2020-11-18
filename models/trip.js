@@ -9,7 +9,7 @@ const tripSchema = new Schema({
     },
     report_doc: {
         type: "string",
-        required: "Your report needs content!"
+        // required: "Your report needs content!"
     },
     completed: {
         type: "boolean",
@@ -27,7 +27,7 @@ const tripSchema = new Schema({
     },
     itinerary: {
         type: "Array",
-        required: "Your itinerary needs at least one stop!"
+        // required: "Your itinerary needs at least one stop!"
     },
     users:[{
         type: Schema.Types.ObjectId,
