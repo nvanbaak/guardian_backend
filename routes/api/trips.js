@@ -71,6 +71,36 @@ router.route("/trips/:id")
         }
         )
     })
+
+router.route("/trips/add/:id")
+    .put((req, res) => {
+        const loggedInUser = checkAuthStatus(req);
+        if (!loggedInUser) {
+            return res.status(401).send("MUST LOGIN FIRST!");
+        }
+
+        db.Trip.findOneAndUpdate(
+            {
+                _id: mongojs.ObjectId(req.params.id)
+            },
+            {
+                $push: {
+                    users: req.body.newMember
+                }
+            })
+            .then(trip => {
+                // console.log(trip);
+                // res.json(trip);
+                db.User.findOneAndUpdate({ _id: mongojs.ObjectId(trip.users[trip.users.length - 1])},{ $push: { trips: trip._id}}, (err, data) => {
+                    if (err) {
+                        console.log("error");
+                        res.send(err)
+                    } else {
+                        res.send(data)
+                    }
+                })
+            })
+    })
 // Request with an id
 // router.route("/trips/:id")
 //     .get((req, res) => {
