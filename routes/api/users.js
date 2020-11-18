@@ -46,7 +46,8 @@ router.route("/users/signin").post((req, res) => {
                 email: foundUser.email,
                 id: foundUser._id,
                 first_name: foundUser.first_name,
-                last_name: foundUser.last_name
+                last_name: foundUser.last_name,
+                position: foundUser.position
             }
             const token = jwt.sign(userTokenInfo, process.env.JWT_SECRET, {expiresIn:"2h"});
             return res.status(200).json({token: token})

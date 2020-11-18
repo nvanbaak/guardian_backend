@@ -37,13 +37,40 @@ router.route("/trips")
                     res.send(data)
                 }
             })
-            // console.log(trip.users[0])
         }).catch(err => {
             console.log(err);
             res.status(500).send("SOMETHING WENT WRONG CREATING YOUR TRIP")
         })
-    }); // end of post()
+    });
+     //end of post()
 
+
+router.route("/trips/:id")
+    .put((req, res) => {
+        const loggedInUser = checkAuthStatus(req);
+        if (!loggedInUser) {
+            return res.status(401).send("MUST LOGIN FIRST!");
+        }
+
+        db.Trip.findOneAndUpdate(
+            {
+                _id: mongojs.ObjectId(req.params.id)
+            },
+            {
+                $set: {
+                    report_doc: req.body.report_doc,
+                    itinerary: req.body.itinerary
+                }
+            },
+        (err, data) => {
+            if (err) {
+                res.send(err)
+            } else {
+                res.send(data)
+            }
+        }
+        )
+    })
 // Request with an id
 // router.route("/trips/:id")
 //     .get((req, res) => {
