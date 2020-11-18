@@ -78,28 +78,26 @@ router.route("/trips/add/:id")
         if (!loggedInUser) {
             return res.status(401).send("MUST LOGIN FIRST!");
         }
-
-        db.Trip.findOneAndUpdate(
-            {
-                _id: mongojs.ObjectId(req.params.id)
-            },
-            {
-                $push: {
-                    users: req.body.newMember
-                }
-            })
+        db.User.findOne({
+            email: req.body.newMember
+        })
+        .then(result => {
+            // res.json(result);
+            // console.log(result)
+            db.Trip.findOneAndUpdate({ _id: mongojs.ObjectId(req.params.id)}, {$push: {users: [result._id]}}, {new: true})
             .then(trip => {
-                // console.log(trip);
-                // res.json(trip);
+                console.log(trip.users[trip.users.length - 1]);
+                    // res.json(trip);
                 db.User.findOneAndUpdate({ _id: mongojs.ObjectId(trip.users[trip.users.length - 1])},{ $push: { trips: trip._id}}, (err, data) => {
                     if (err) {
-                        console.log("error");
-                        res.send(err)
-                    } else {
-                        res.send(data)
+                        res.send(err);
+                    }
+                    else {
+                        res.send(data);
                     }
                 })
             })
+        })
     })
 // Request with an id
 // router.route("/trips/:id")
