@@ -4,6 +4,7 @@ const db = require("../../models");
 const jwt = require("jsonwebtoken");
 const checkAuthStatus = require("../../utils/checkAuthStatus");
 const mongojs = require("mongojs");
+const { mongo } = require("mongoose");
 
 // Request without an id
 router.route("/trips")
@@ -99,6 +100,31 @@ router.route("/trips/add/:id")
             })
         })
     })
+
+router.route("/trips/:id")
+    .delete((req, res) => {
+        const loggedInUser = checkAuthStatus(req);
+        if (!loggedInUser) {
+            return res.status(401).send("MUST LOGIN FIRST!");
+        }
+        db.Trip.findOne({
+            _id: mongojs.ObjectId(req.params.id)
+        }).then(trip => {
+            if (trip.users.includes(loggedInUser.id)) {
+                db.Trip.remove({
+                    _id: mongojs.ObjectId(trip._id)
+                }).then(delTrip => {
+                    res.json(delTrip)
+                }).catch(err => {
+                    console.log(err);
+                    res.status(500).send("SOMETHING WENT WRONG WITH DELETING THIS TRIP")
+                })
+            } else {
+                return res.status(401).send("YOU MUST BE A MEMBER OF THIS TRIP TO DELETE IT")
+            }
+        })
+    });
+
 // Request with an id
 // router.route("/trips/:id")
 //     .get((req, res) => {
