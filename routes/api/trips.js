@@ -111,15 +111,23 @@ router.route("/trips/remove/:id")
             email: req.body.deleteMember
         })
         .then(result => {
-            db.Trip.findOneAndUpdate({ _id: mongojs.ObjectId(req.params.id)}, {$pull: {users: result._id}})
-            .then(trip => {
-                db.User.findOneAndUpdate({ _id: mongojs.ObjectID(result._id)}, {$pull: {trips: trip._id}}, (err, data) => {
-                    if (err) {
-                        console.log(err);
-                    } else {
-                        res.send(data);
-                    }
-                })
+            db.Trip.findOne({
+                _id: mongojs.ObjectID(req.params.id)
+            }).then(trip => {
+                if (trip.users.includes(loggedInUser.id)) {
+                    db.Trip.findOneAndUpdate({ _id: mongojs.ObjectId(req.params.id)}, {$pull: {users: result._id}})
+                    .then(trip => {
+                        db.User.findOneAndUpdate({ _id: mongojs.ObjectID(result._id)}, {$pull: {trips: trip._id}}, (err, data) => {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                res.send(data);
+                            }
+                        })
+                    })
+                } else {
+                    return res.status(401).send("YOU MUST BE A TEAM MEMBER OF THIS TRIP TO DELETE ANOTHER MEMBER!")
+                }
             })
         })
     })
