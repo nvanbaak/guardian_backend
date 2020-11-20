@@ -63,6 +63,7 @@ router.route("/trips/:id")
                     itinerary: req.body.itinerary
                 }
             },
+            { new: true },
         (err, data) => {
             if (err) {
                 res.send(err)
