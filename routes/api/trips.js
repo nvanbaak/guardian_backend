@@ -52,7 +52,6 @@ router.route("/trips/:id")
         if (!loggedInUser) {
             return res.status(401).send("MUST LOGIN FIRST!");
         }
-
         db.Trip.findOneAndUpdate(
             {
                 _id: mongojs.ObjectId(req.params.id)
@@ -94,6 +93,29 @@ router.route("/trips/add/:id")
                         res.send(err);
                     }
                     else {
+                        res.send(data);
+                    }
+                })
+            })
+        })
+    })
+
+router.route("/trips/remove/:id")
+    .delete((req,res) => {
+        const loggedInUser = checkAuthStatus(req);
+        if (!loggedInUser) {
+            return res.status(401).send("MUST LOGIN FIRST!");
+        }
+        db.User.findOne({
+            email: req.body.deleteMember
+        })
+        .then(result => {
+            db.Trip.findOneAndUpdate({ _id: mongojs.ObjectId(req.params.id)}, {$pull: {users: result._id}})
+            .then(trip => {
+                db.User.findOneAndUpdate({ _id: mongojs.ObjectID(result._id)}, {$pull: {trips: trip._id}}, (err, data) => {
+                    if (err) {
+                        console.log(err);
+                    } else {
                         res.send(data);
                     }
                 })
