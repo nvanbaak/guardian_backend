@@ -52,25 +52,38 @@ router.route("/trips/:id")
         if (!loggedInUser) {
             return res.status(401).send("MUST LOGIN FIRST!");
         }
-        db.Trip.findOneAndUpdate(
-            {
-                _id: mongojs.ObjectId(req.params.id)
-            },
-            {
-                $set: {
-                    report_doc: req.body.report_doc,
-                    itinerary: req.body.itinerary
+        db.Trip.findOne({
+            _id: mongojs.ObjectID(req.params.id)
+        })
+        .then(trip => {
+            if (trip.users.includes(loggedInUser.id)) {
+                db.Trip.findOneAndUpdate(
+                    {
+                        _id: mongojs.ObjectId(req.params.id)
+                    },
+                    {
+                        $set: {
+                            report_doc: req.body.report_doc,
+                            itinerary: {
+                                location: req.body.location,
+                                coordinates: {lon: req.body.lon, lat: req.body.lat},
+                                time: req.body.time
+                            }
+                        }
+                    },
+                    { new: true },
+                (err, data) => {
+                    if (err) {
+                        res.send(err)
+                    } else {
+                        res.send(data)
+                    }
                 }
-            },
-            { new: true },
-        (err, data) => {
-            if (err) {
-                res.send(err)
+                )
             } else {
-                res.send(data)
+                res.status(401).send("YOU ARE NOT AUTHORIZED TO EDIT THIS TRIP")
             }
-        }
-        )
+        })
     })
 
 router.route("/trips/add/:id")
