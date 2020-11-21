@@ -24,7 +24,6 @@ router
     if (!loggedInUser) {
       return res.status(401).send("MUST LOGIN FIRST!");
     }
-
     db.Trip.create({
       city: req.body.city,
       start_date: req.body.start_date,
@@ -52,6 +51,46 @@ router
   });
 //end of post()
 
+router.route("/trips/:id")
+    .put((req, res) => {
+        const loggedInUser = checkAuthStatus(req);
+        if (!loggedInUser) {
+            return res.status(401).send("MUST LOGIN FIRST!");
+        }
+        db.Trip.findOne({
+            _id: mongojs.ObjectID(req.params.id)
+        })
+        .then(trip => {
+            if (trip.users.includes(loggedInUser.id)) {
+                db.Trip.findOneAndUpdate(
+                    {
+                        _id: mongojs.ObjectId(req.params.id)
+                    },
+                    {
+                        $set: {
+                            report_doc: req.body.report_doc,
+                            itinerary: {
+                                location: req.body.location,
+                                coordinates: {lon: req.body.lon, lat: req.body.lat},
+                                time: req.body.time
+                            }
+                        }
+                    },
+                    { new: true },
+                (err, data) => {
+                    if (err) {
+                        res.send(err)
+                    } else {
+                        res.send(data)
+                    }
+                }
+                )
+            } else {
+                res.status(401).send("YOU ARE NOT AUTHORIZED TO EDIT THIS TRIP")
+            }
+        })
+    })
+
 router.route("/trips/:id").put((req, res) => {
   const loggedInUser = checkAuthStatus(req);
   if (!loggedInUser) {
@@ -66,8 +105,6 @@ router.route("/trips/:id").put((req, res) => {
       $set: {
         report_doc: req.body.report_doc,
         itinerary: req.body.itinerary,
-        start_date: req.body.start_date,
-        end_date: req.body.end_date,
       },
     },
     { new: true },
@@ -134,11 +171,37 @@ router.route("/trips/add/:id").put((req, res) => {
           } else {
             res.send(data);
           }
+
+router.route("/trips/remove/:id")
+    .delete((req,res) => {
+        const loggedInUser = checkAuthStatus(req);
+        if (!loggedInUser) {
+            return res.status(401).send("MUST LOGIN FIRST!");
         }
-      );
-    });
-  });
-});
+        db.User.findOne({
+            email: req.body.deleteMember
+        })
+        .then(result => {
+            db.Trip.findOne({
+                _id: mongojs.ObjectID(req.params.id)
+            }).then(trip => {
+                if (trip.users.includes(loggedInUser.id)) {
+                    db.Trip.findOneAndUpdate({ _id: mongojs.ObjectId(req.params.id)}, {$pull: {users: result._id}})
+                    .then(trip => {
+                        db.User.findOneAndUpdate({ _id: mongojs.ObjectID(result._id)}, {$pull: {trips: trip._id}}, (err, data) => {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                res.send(data);
+                            }
+                        })
+                    })
+                } else {
+                    return res.status(401).send("YOU MUST BE A TEAM MEMBER OF THIS TRIP TO DELETE ANOTHER MEMBER!")
+                }
+            })
+        })
+    })
 
 router.route("/trips/:id").delete((req, res) => {
   const loggedInUser = checkAuthStatus(req);
