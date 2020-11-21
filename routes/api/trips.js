@@ -81,6 +81,33 @@ router.route("/trips/:id").put((req, res) => {
   );
 });
 
+router.route("/trips/dates/:id").put((req, res) => {
+  const loggedInUser = checkAuthStatus(req);
+  if (!loggedInUser) {
+    return res.status(401).send("MUST LOGIN FIRST!");
+  }
+
+  db.Trip.findOneAndUpdate(
+    {
+      _id: mongojs.ObjectId(req.params.id),
+    },
+    {
+      $set: {
+        start_date: req.body.start_date,
+        end_date: req.body.end_date,
+      },
+    },
+    { new: true },
+    (err, data) => {
+      if (err) {
+        res.send(err);
+      } else {
+        res.send(data);
+      }
+    }
+  );
+});
+
 router.route("/trips/add/:id").put((req, res) => {
   const loggedInUser = checkAuthStatus(req);
   if (!loggedInUser) {
