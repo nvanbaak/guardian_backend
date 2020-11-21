@@ -7,8 +7,7 @@ const mongojs = require("mongojs");
 const { mongo } = require("mongoose");
 
 // Request without an id
-router
-  .route("/trips")
+router.route("/trips")
   .get((req, res) => {
     db.Trip.find()
       .then((trips) => {
@@ -171,6 +170,11 @@ router.route("/trips/add/:id").put((req, res) => {
           } else {
             res.send(data);
           }
+        }
+      );
+    });
+  });
+});
 
 router.route("/trips/remove/:id")
     .delete((req,res) => {
@@ -228,6 +232,27 @@ router.route("/trips/:id").delete((req, res) => {
         .send("YOU MUST BE A MEMBER OF THIS TRIP TO DELETE IT");
     }
   });
+});
+
+router.route("/trip/:id").get((req, res) => {
+    const loggedInUser = checkAuthStatus(req);
+    if (!loggedInUser) {
+      return res.status(401).send("MUST LOGIN FIRST!");
+    }
+    db.Trip.findOne({
+        _id: mongojs.ObjectID(req.params.id)
+    })
+    .then(result => {
+        if (result.users.includes(loggedInUser.id)) {
+            db.Trip.findOne({
+                _id: mongojs.ObjectID(req.params.id)
+            })
+            .then(trip => res.json(trip))
+            .catch(err => console.log(err))
+        } else {
+            return res.status(401).send("YOU ARE NOT AUTHORIZED TO VIEW THIS TRIP")
+        }
+    });
 });
 
 // Request with an id
