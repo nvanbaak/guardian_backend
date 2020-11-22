@@ -50,6 +50,38 @@ router.route("/trips")
   });
 //end of post()
 
+router.route("/trips/complete/:id").put((req, res) => {
+    const loggedInUser = checkAuthStatus(req);
+    if (!loggedInUser) {
+        return res.status(401).send("MUST LOGIN FIRST!");
+    }
+    db.Trip.findOne({
+        _id: mongojs.ObjectID(req.params.id)
+    })
+    .then(trip => {
+        if (trip.users.includes(loggedInUser.id)) {
+            db.Trip.findOneAndUpdate(
+                {
+                    _id: mongojs.ObjectID(req.params.id)
+                },
+                {
+                    $set: { completed: req.body.completed }
+                },
+                {new: true},
+                (err, data) => {
+                    if (err) {
+                        res.send(err)
+                    } else {
+                        res.send(data);
+                    }
+                }
+            )
+        } else {
+            res.status(401).send("YOU ARE NOT AUTHORIZED TO ADD AN EVENT TO THIS TRIP")
+        }
+    })
+})
+
 router.route("/trips/event/:id").put((req, res) => {
     const loggedInUser = checkAuthStatus(req);
     if (!loggedInUser) {
@@ -174,6 +206,8 @@ router.route("/trips/dates/:id").put((req, res) => {
     }
   );
 });
+
+
 
 router.route("/trips/add/:id").put((req, res) => {
   const loggedInUser = checkAuthStatus(req);
