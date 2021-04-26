@@ -13,6 +13,9 @@
 
 Guardian is an app for the executive protection industry.  Most executive protection teams have unwieldy technological solutions to documentation and information sharing.  Relying on outdated technology impedes the team's ability to do their job and might even create security vulnerabilities.  Guardian solves these problems by providing a sleek, efficient, and secure platform for information collection and storage, allowing executive protection agents to focus on doing their job.  
 
+## Check out the deployed version on Heroku:
+https://sj-guardian-react.herokuapp.com/
+
 ## Usage
 
 After logging in, users can create Trips for a single excursion and add other members of the team to their Teams page.  All team members can be assigned a role as either Lead, Advance Lead, Agent, or Medic.  Each Trip has its own page, containing an embedded map, an itinerary, and a whiteboard for passing notes between agents assigned to the trip.
