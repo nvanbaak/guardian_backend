@@ -14,6 +14,7 @@
 Guardian is an app for the executive protection industry.  Most executive protection teams have unwieldy technological solutions to documentation and information sharing.  Relying on outdated technology impedes the team's ability to do their job and might even create security vulnerabilities.  Guardian solves these problems by providing a sleek, efficient, and secure platform for information collection and storage, allowing executive protection agents to focus on doing their job.  
 
 ## Check out the deployed version on Heroku:
+
 https://sj-guardian-react.herokuapp.com/
 
 ## Usage
